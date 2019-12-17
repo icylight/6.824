@@ -18,22 +18,30 @@ type KeyValue struct {
 // use ihash(key) % NReduce to choose the reduce
 // task number for each KeyValue emitted by Map.
 //
-func ihash(s string) int {
+func ihash(key string) int {
 	h := fnv.New32a()
-	h.Write([]byte(s))
+	h.Write([]byte(key))
 	return int(h.Sum32() & 0x7fffffff)
 }
 
 
+//
+// main/mrworker.go calls this function.
+//
 func Worker(mapf func(string, string) []KeyValue,
 	reducef func(string, []string) string) {
 
 	// Your worker implementation here.
 
+	// uncomment to send the Example RPC to the master.
+	// CallExample()
+
 }
 
 //
 // example function to show how to make an RPC call to the master.
+//
+// the RPC argument and reply types are defined in rpc.go.
 //
 func CallExample() {
 
@@ -60,7 +68,8 @@ func CallExample() {
 //
 func call(rpcname string, args interface{}, reply interface{}) bool {
 	// c, err := rpc.DialHTTP("tcp", "127.0.0.1"+":1234")
-	c, err := rpc.DialHTTP("unix", "mr-socket")
+	sockname := masterSock()
+	c, err := rpc.DialHTTP("unix", sockname)
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}
